@@ -4,6 +4,7 @@ type t = {
   window : Gfx.window;
   ctx : Gfx.context;
   mutable cam_y : float;
+  txt_tbl : (string, Texture.t) Hashtbl.t;
 }
 
 let state = ref None
@@ -22,3 +23,10 @@ let set_camera y =
 let camera () =
   let g = get () in
   g.cam_y
+
+let get_texture name =
+  let g = get () in
+  try
+    Hashtbl.find g.txt_tbl name
+  with Not_found ->
+    failwith (Printf.sprintf "Texture %s not found" name)

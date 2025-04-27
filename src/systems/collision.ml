@@ -23,7 +23,10 @@ let update _ el =
         let b1 = e1#box#get in
         let p2 = e2#position#get in
         let b2 = e2#box#get in
-        let pdiff, rdiff = Rect.mdiff p2 b2 p1 b1 in
+        let pdiff, rdiff =
+          if m2 > m1 then Rect.mdiff p2 b2 p1 b1
+          else Rect.mdiff p1 b1 p2 b2
+        in
         if Rect.has_origin pdiff rdiff then (
           let pv = Rect.penetration_vector pdiff rdiff in
           e1#resolve#get pv (e2#tag#get);

@@ -48,9 +48,13 @@ let max_fall_speed = 10.0
 let player_floatiness = 0.3
 let double_jumps = 1
 
-let player_speed = 5.0
-let player_hp = 4
+let player_speed = 6.0
+let player_hp = 5
 let player_hit_knockback = 3.0
+let player_invincibility = 2000.0
+let player_invincible_sprite = Texture.Color (Gfx.color 255 0 255 0)
+let invincibility_sprite_delay = 70.0
+
 
 let jump_button = "p"
 let shoot_button = "o"
@@ -67,19 +71,28 @@ let up_alpha = 0.15
 let down_alpha = 0.05
 
 let bullet_speed = 8.0
-let bullet_size = 10
+let bullet_size = 15
 let bullet_lifetime = 500.0
 let bullet_reload_time = 300.0
 let bullet_knockback = 5.0
 
 
 let frog_sprite = Texture.Color (Gfx.color 0 255 0 255)
-let frog_hitbox_width = 25
-let frog_hitbox_height = 25
+let frog_hitbox_width = 26
+let frog_hitbox_height = 22
 let frog_jump_force = 10.0
 let frog_jump_delay = 1500.0
 
-let bat_sprite = Texture.Color (Gfx.color 255 0 255 255)
-let bat_hitbox_width = 25
-let bat_hitbox_height = 25
+let bat_sprite = "bat-1.png"
+let bat_hitbox_width = 50
+let bat_hitbox_height = 30
 let bat_speed = 2.5
+
+(* let fly_sprite = Texture.Color (Gfx.color 255 255 0 255) *)
+let fly_sprite = "fly-1.png"
+let fly_hitbox_width = 26
+let fly_hitbox_height = 30
+let fly_bullet_speed = 4.0
+let fly_speed_factor = 0.012
+
+let animation_delay = 200.0

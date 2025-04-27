@@ -56,14 +56,14 @@ class on_ground () =
 type enemy_type =
   | Frog
   | Bat
-  | Slime
+  | Fly
 
 type tag = 
   | Player of bool
   | Enemy of enemy_type
-  | Wall of bool
+  | Wall
   | Ground
-  | Bullet
+  | Bullet of bool
   | Item
   | No_tag
 
@@ -156,13 +156,24 @@ class stunned () =
   object
     method stunned = r
   end
-class stunned_timer () =
+
+class invicible_timer () =
   let r = Component.init 0.0 in
   object
-    method stunned_timer = r
+    method invicible_timer = r
   end
 
+class animation_timer () =
+  let r = Component.init 0.0 in
+  object
+    method animation_timer = r
+  end
 
+class sprite_index () =
+  let r = Component.init 0 in
+  object
+    method sprite_index = r
+  end
 
 (** Archetype *)
 class type movable =
@@ -208,6 +219,7 @@ class type drawable =
     inherit position
     inherit box
     inherit texture
+    inherit tagged
   end
 
 class type playable =
@@ -233,7 +245,7 @@ class type playable =
     inherit reload_timer
     inherit hp
     inherit stunned
-    inherit stunned_timer
+    inherit invicible_timer
   end
 
 class type perishable =
@@ -256,6 +268,9 @@ class type foe =
     inherit hp
     inherit facing
     inherit jump_timer
+    inherit animation_timer
+    inherit sprite_index
+    inherit texture
   end
 
 class type killable =
@@ -302,7 +317,7 @@ class player () =
     inherit reload_timer ()
     inherit hp ()
     inherit stunned ()
-    inherit stunned_timer ()
+    inherit invicible_timer ()
   end
 
 class wall () =
@@ -347,4 +362,6 @@ object
   inherit hp ()
   inherit facing ()
   inherit jump_timer ()
+  inherit animation_timer ()
+  inherit sprite_index ()
 end

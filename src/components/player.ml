@@ -3,6 +3,20 @@ open Component_defs
 open System_defs
 open Play_system_def
 
+let got_hit (p:player) (pv:Vector.t) =
+  if p#invicible_timer#get > 0.0 then ()
+  else
+  (p#hp#set (p#hp#get - 1);
+  p#stunned#set true;
+  p#texture#set Cst.player_stunned_sprite;
+  let x_knockback = if pv.x < 0.0 then (-1.0) else 1.0 in
+  p#velocity#set Vector.{x = x_knockback *. Cst.player_hit_knockback; y = 0.0 -. 2.0  *. Cst.player_hit_knockback};
+  p#invicible_timer#set Cst.player_invincibility;
+
+  )
+
+
+
 let create (x, y) =
   let p = new player () in
   p#texture#set Cst.player_sprite;
@@ -15,28 +29,7 @@ let create (x, y) =
   p#stunned#set false;
   p#resolve#set (fun pv tag ->
       match tag with
-      | Wall b ->
-        let pv = if b then pv else Vector.{x = -.pv.x; y = -.pv.y} in
-        if abs_float pv.x > abs_float pv.y then (
-          p#position#set Vector.{x = p#position#get.x -. pv.x; y = p#position#get.y};
-          p#velocity#set Vector.{x = 0.0; y = p#velocity#get.y};
-          (if not p#on_ground#get then
-            if pv.x > 0.0 then
-              p#on_wall#set 1
-            else
-              p#on_wall#set (-1));
-            p#jump_count#set (0)
-        ) else (
-          p#position#set Vector.{x = p#position#get.x; y = p#position#get.y -. pv.y};
-          p#velocity#set Vector.{x = if pv.y > 0.0 then 0.0 else p#velocity#get.x; y = 0.0};
-          if pv.y > 0.0 then (
-            p#on_ground#set true;
-            p#jump_count#set (0);
-            p#stunned#set false;
-          )
-        )
-        
-      | Ground ->
+      | Wall ->
         if abs_float pv.x > abs_float pv.y then (
           p#position#set Vector.{x = p#position#get.x +. pv.x; y = p#position#get.y};
           p#velocity#set Vector.{x = 0.0; y = p#velocity#get.y};
@@ -48,7 +41,7 @@ let create (x, y) =
             p#jump_count#set (0)
         ) else (
           p#position#set Vector.{x = p#position#get.x; y = p#position#get.y +. pv.y};
-          p#velocity#set Vector.{x = 0.0; y = 0.0};
+          p#velocity#set Vector.{x = if pv.y < 0.0 then 0.0 else p#velocity#get.x; y = 0.0};
           if pv.y < 0.0 then (
             p#on_ground#set true;
             p#jump_count#set (0);
@@ -58,21 +51,24 @@ let create (x, y) =
       | Enemy _ ->
         if not p#stunned#get then (
           if p#jump_count#get < 1 then (
-            p#hp#set (p#hp#get - 1);
-            p#stunned#set true;
-            p#texture#set Cst.player_stunned_sprite;
-            let x_knockback = if pv.x < 0.0 then (-1.0) else 1.0 in
-            p#velocity#set Vector.{x = x_knockback *. Cst.player_hit_knockback; y = 0.0 -. 2.0  *. Cst.player_hit_knockback}
+            got_hit p pv;
           ) else (
             let y_factor = if pv.y > 0.0 then (-1.0) else 1.0 in
             let y_bounce = if Input.has_key Cst.jump_button then 1.65 else 1.1 in
+            p#position#set (Vector.add p#position#get (Vector.mult 2.5 pv));
             p#velocity#set Vector.{x = p#velocity#get.x; y = y_bounce *. Cst.jump_force *. y_factor}
           )
         )
+      | Bullet false ->
+        if not p#stunned#get then (
+            got_hit p pv;
+        )
+        
       | _ -> ());
   p#mass#set Cst.player_mass; 
   p#floatiness#set Cst.player_floatiness;
   p#double_jumps#set Cst.double_jumps;
+  Die_system.(register (p:>t));
   Collision_system.(register (p:>t));
   Gravity_system.(register (p:>t));
   Play_system.(register (p:>t));

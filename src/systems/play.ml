@@ -5,6 +5,8 @@ type t = playable
 
 let init _ = ()
 
+let invincibility = ref (false, 0.0)
+
 
 let jump (e:t) =
   let Vector.{x;y} = e#velocity#get in
@@ -82,7 +84,7 @@ let update dt el =
           let x_offset = if e#facing#get > 0 then (float Cst.player_hitbox_width) else 0.0 in
           let v = Vector.{x = (float e#facing#get) *. Cst.bullet_speed; y = 0.0} in
           let _ = Bullet.create ((x +. x_offset), (y +. (float Cst.player_hitbox_height) /. 2.0),
-                                v, Cst.bullet_sprite, Cst.bullet_size, Cst.bullet_size, 1.0, true, Cst.bullet_lifetime) in
+                                v, Cst.bullet_size, Cst.bullet_size, 1.0, true, Cst.bullet_lifetime, true) in
   
           e#position#set Vector.{x = x -. (float e#facing#get) *. Cst.bullet_knockback; y = y};
         )
@@ -104,6 +106,19 @@ let update dt el =
 
     if e#reload_timer#get > 0.0 then (
       e#reload_timer#set (e#reload_timer#get -. (dt -. !timer));
+    );
+
+
+    if e#invicible_timer#get > 0.0 then (
+      e#invicible_timer#set (e#invicible_timer#get -. (dt -. !timer));
+      let (b, t) = !invincibility in
+      let sprite = if b then Cst.player_invincible_sprite else e#texture#get in
+      e#texture#set sprite;
+      if t > 0.0 then (
+        invincibility := (b, t -. (dt -. !timer));
+      ) else (
+        invincibility := (not b, Cst.invincibility_sprite_delay);
+      )
     );
 
 
